@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pausas Activas — Equi</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #2D3436; background-color: #FFFDF9; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 50px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background-color: #5BA4A4; color: #fff; box-shadow: 0 4px 20px rgba(91,164,164,0.3); }
+        .btn-primary:hover { background-color: #4E9494; }
+        .btn-secondary { background: transparent; color: #2D3436; border: 2px solid #ddd; }
+        .btn-secondary:hover { border-color: #5BA4A4; color: #5BA4A4; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; padding: 16px 0; background-color: rgba(255,253,249,0.95); backdrop-filter: blur(12px); box-shadow: 0 1px 12px rgba(0,0,0,0.05); }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { display: flex; align-items: center; }
+        .nav-logo img { height: 40px; }
+        .nav-links { display: flex; list-style: none; gap: 28px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: #5BA4A4; }
+        .nav-links .back-link { color: #5BA4A4; font-weight: 600; }
+
+        .page-header { padding: 140px 0 60px; text-align: center; background: linear-gradient(160deg, #FFFDF9 0%, #E8F6F3 50%, #FFFDF9 100%); }
+        .page-header .icon { font-size: 3rem; margin-bottom: 16px; }
+        .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 12px; }
+        .page-header h1 span { color: #5BA4A4; }
+        .page-header p { font-size: 1.05rem; color: #666; max-width: 520px; margin: 0 auto; }
+
+        .breaks-section { padding: 60px 0 80px; flex: 1; }
+
+        .timer-display { text-align: center; margin-bottom: 40px; }
+        .timer-ring { width: 200px; height: 200px; position: relative; margin: 0 auto 20px; }
+        .timer-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .timer-ring .bg { fill: none; stroke: #eee; stroke-width: 6; }
+        .timer-ring .progress { fill: none; stroke: #A8C5A0; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+        .timer-ring .time-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.4rem; font-weight: 700; }
+        .timer-ring .exercise-name { font-size: 0.9rem; color: #5BA4A4; font-weight: 500; margin-top: 4px; }
+
+        .break-controls { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; }
+        .interval-select { display: flex; gap: 8px; justify-content: center; margin-bottom: 32px; }
+        .interval-btn { padding: 8px 20px; border-radius: 50px; border: 2px solid #eee; background: #fff; font-size: 0.82rem; cursor: pointer; transition: all 0.3s; }
+        .interval-btn:hover, .interval-btn.active { border-color: #5BA4A4; color: #5BA4A4; background: rgba(91,164,164,0.08); }
+
+        .exercises-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 40px; }
+        .exercise-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); cursor: pointer; transition: all 0.3s; }
+        .exercise-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .exercise-card.active { border-color: #5BA4A4; background: rgba(91,164,164,0.04); }
+        .exercise-card .ex-icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .exercise-card h4 { font-size: 0.95rem; margin-bottom: 4px; }
+        .exercise-card p { font-size: 0.82rem; color: #888; }
+        .exercise-card .ex-duration { font-size: 0.75rem; color: #5BA4A4; font-weight: 600; margin-top: 8px; }
+
+        .streak-bar { display: flex; gap: 16px; justify-content: center; margin-top: 20px; }
+        .streak-card { text-align: center; padding: 16px 24px; background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .streak-card .num { font-size: 1.6rem; font-weight: 700; color: #5BA4A4; }
+        .streak-card .lbl { font-size: 0.75rem; color: #999; }
+
+        footer { padding: 32px 0; background-color: #2D3436; color: rgba(255,255,255,0.6); text-align: center; margin-top: auto; }
+        footer .footer-logo { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        footer p { font-size: 0.82rem; }
+
+        @media (max-width: 768px) {
+            .exercises-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo"><img src="images/logo-equi.png" alt="Equi"></a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="back-link">&#8592; Volver al Inicio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <div class="icon">&#129488;</div>
+            <h1>Pausas <span>Activas</span></h1>
+            <p>Rutinas de estiramientos, respiracion y meditacion para desconectar y recargar</p>
+        </div>
+    </header>
+
+    <section class="breaks-section">
+        <div class="container">
+            <div class="interval-select">
+                <button class="interval-btn active" data-interval="300">Cada 30 min</button>
+                <button class="interval-btn" data-interval="600">Cada 1 hora</button>
+                <button class="interval-btn" data-interval="900">Cada 1.5 h</button>
+            </div>
+
+            <div class="timer-display">
+                <div class="timer-ring">
+                    <svg viewBox="0 0 200 200">
+                        <circle class="bg" cx="100" cy="100" r="90"></circle>
+                        <circle class="progress" id="breakProgress" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+                    </svg>
+                    <div class="time-text" id="breakTimer">5:00</div>
+                </div>
+                <div class="exercise-name" id="currentExerciseName">Selecciona un ejercicio</div>
+            </div>
+
+            <div class="break-controls">
+                <button class="btn btn-primary" id="breakStartBtn">Iniciar Pausa</button>
+                <button class="btn btn-secondary" id="breakResetBtn">Reiniciar</button>
+            </div>
+
+            <div class="exercises-grid" id="exercisesGrid"></div>
+
+            <div class="streak-bar">
+                <div class="streak-card"><div class="num" id="todayBreaks">0</div><div class="lbl">Pausas hoy</div></div>
+                <div class="streak-card"><div class="num" id="totalBreaks">0</div><div class="lbl">Total esta semana</div></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-logo">Equi.</div>
+            <p>Creado con &#10084; por estudiantes universitarios</p>
+        </div>
+    </footer>
+
+    <script>
+        const exercises = [
+            { id: 1, icon: '&#129488;', name: 'Estiramiento de Cuello', desc: 'Gira suavemente la cabeza de lado a lado', duration: 60, category: 'estiramiento' },
+            { id: 2, icon: '&#128170;', name: 'Hombros Arriba-Abajo', desc: 'Eleva y relaja los hombros 10 veces', duration: 60, category: 'estiramiento' },
+            { id: 3, icon: '&#129336;', name: 'Estiramiento de Espalda', desc: 'Inclina el torso hacia adelante lentamente', duration: 90, category: 'estiramiento' },
+            { id: 4, icon: '&#128170;', name: 'Sentadillas Suaves', desc: '5 sentadillas lentas para activar piernas', duration: 60, category: 'movimiento' },
+            { id: 5, icon: '&#128172;', name: 'Respiracion 4-7-8', desc: 'Inhala 4s, sostiene 7s, exhala 8s', duration: 120, category: 'respiracion' },
+            { id: 6, icon: '&#128571;', name: 'Respiracion Cuadrada', desc: 'Inhala-sostiene-exhala-sostiene 4s cada uno', duration: 120, category: 'respiracion' },
+            { id: 7, icon: '&#129502;', name: 'Meditacion Rápida', desc: 'Cierra los ojos y enfocate en tu respiracion', duration: 180, category: 'meditacion' },
+            { id: 8, icon: '&#127793;', name: 'Escaneo Corporal', desc: 'Recorre mentalmente cada parte de tu cuerpo', duration: 180, category: 'meditacion' }
+        ];
+
+        let selectedExercise = exercises[0];
+        let breakDuration = 300;
+        let breakRemaining = 300;
+        let breakInterval = null;
+        let isRunning = false;
+        const circ = 2 * Math.PI * 90;
+
+        function renderExercises() {
+            document.getElementById('exercisesGrid').innerHTML = exercises.map(e => `
+                <div class="exercise-card ${e.id === selectedExercise.id ? 'active' : ''}" onclick="selectExercise(${e.id})">
+                    <div class="ex-icon">${e.icon}</div>
+                    <h4>${e.name}</h4>
+                    <p>${e.desc}</p>
+                    <div class="ex-duration">${e.duration}s</div>
+                </div>
+            `).join('');
+        }
+
+        function selectExercise(id) {
+            if (isRunning) return;
+            selectedExercise = exercises.find(e => e.id === id);
+            breakDuration = selectedExercise.duration;
+            breakRemaining = breakDuration;
+            document.getElementById('currentExerciseName').textContent = selectedExercise.name;
+            updateBreakTimer();
+            renderExercises();
+        }
+
+        function updateBreakTimer() {
+            const m = Math.floor(breakRemaining / 60);
+            const s = breakRemaining % 60;
+            document.getElementById('breakTimer').textContent = m + ':' + String(s).padStart(2, '0');
+            const offset = circ * (1 - breakRemaining / breakDuration);
+            document.getElementById('breakProgress').style.strokeDashoffset = offset;
+        }
+
+        document.querySelectorAll('.interval-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.interval-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                breakDuration = parseInt(btn.dataset.interval);
+                breakRemaining = breakDuration;
+                updateBreakTimer();
+            });
+        });
+
+        document.getElementById('breakStartBtn').addEventListener('click', () => {
+            if (isRunning) {
+                clearInterval(breakInterval);
+                isRunning = false;
+                document.getElementById('breakStartBtn').textContent = 'Iniciar Pausa';
+                return;
+            }
+            isRunning = true;
+            document.getElementById('breakStartBtn').textContent = 'Pausar';
+            breakInterval = setInterval(() => {
+                breakRemaining--;
+                updateBreakTimer();
+                if (breakRemaining <= 0) {
+                    clearInterval(breakInterval);
+                    isRunning = false;
+                    document.getElementById('breakStartBtn').textContent = 'Iniciar Pausa';
+                    saveBreak();
+                    breakRemaining = breakDuration;
+                    updateBreakTimer();
+                    alert('Pausa completada! Tu cuerpo te lo agradece.');
+                }
+            }, 1000);
+        });
+
+        document.getElementById('breakResetBtn').addEventListener('click', () => {
+            clearInterval(breakInterval);
+            isRunning = false;
+            breakRemaining = breakDuration;
+            document.getElementById('breakStartBtn').textContent = 'Iniciar Pausa';
+            updateBreakTimer();
+        });
+
+        function saveBreak() {
+            const today = new Date().toDateString();
+            const data = JSON.parse(localStorage.getItem('equi_breaks') || '{"today":"","todayCount":0,"weekCount":0}');
+            if (data.today !== today) { data.today = today; data.todayCount = 0; }
+            data.todayCount++;
+            data.weekCount++;
+            localStorage.setItem('equi_breaks', JSON.stringify(data));
+            loadStats();
+        }
+
+        function loadStats() {
+            const data = JSON.parse(localStorage.getItem('equi_breaks') || '{"today":"","todayCount":0,"weekCount":0}');
+            document.getElementById('todayBreaks').textContent = data.todayCount;
+            document.getElementById('totalBreaks').textContent = data.weekCount;
+        }
+
+        renderExercises(); loadStats(); updateBreakTimer();
+    </script>
+</body>
+</html>

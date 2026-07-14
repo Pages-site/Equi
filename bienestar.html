@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienestar Integral — Equi</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #2D3436; background-color: #FFFDF9; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 50px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background-color: #5BA4A4; color: #fff; box-shadow: 0 4px 20px rgba(91,164,164,0.3); }
+        .btn-primary:hover { background-color: #4E9494; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; padding: 16px 0; background-color: rgba(255,253,249,0.95); backdrop-filter: blur(12px); box-shadow: 0 1px 12px rgba(0,0,0,0.05); }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { display: flex; align-items: center; }
+        .nav-logo img { height: 40px; }
+        .nav-links { display: flex; list-style: none; gap: 28px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: #5BA4A4; }
+        .nav-links .back-link { color: #5BA4A4; font-weight: 600; }
+
+        .page-header { padding: 140px 0 60px; text-align: center; background: linear-gradient(160deg, #FFFDF9 0%, #FFF0E6 50%, #E8F6F3 100%); }
+        .page-header .icon { font-size: 3rem; margin-bottom: 16px; }
+        .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 12px; }
+        .page-header h1 span { color: #5BA4A4; }
+        .page-header p { font-size: 1.05rem; color: #666; max-width: 520px; margin: 0 auto; }
+
+        .wellness-section { padding: 60px 0 80px; flex: 1; }
+
+        .tabs { display: flex; gap: 12px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+        .tab { padding: 10px 28px; border-radius: 50px; border: 2px solid #eee; background: #fff; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+        .tab:hover, .tab.active { border-color: #5BA4A4; background: rgba(91,164,164,0.08); color: #5BA4A4; }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 36px; }
+        .tip-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); }
+        .tip-card .tip-icon { font-size: 1.8rem; margin-bottom: 12px; }
+        .tip-card h4 { font-size: 1rem; margin-bottom: 6px; }
+        .tip-card p { font-size: 0.88rem; color: #666; line-height: 1.7; }
+
+        .checklist { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); }
+        .checklist h3 { font-size: 1.1rem; margin-bottom: 16px; }
+        .check-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+        .check-item:last-child { border-bottom: none; }
+        .check-box { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; }
+        .check-item.done .check-box { background: #5BA4A4; border-color: #5BA4A4; }
+        .check-box::after { content: ''; display: none; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px; }
+        .check-item.done .check-box::after { display: block; }
+        .check-label { font-size: 0.92rem; color: #444; }
+        .check-item.done .check-label { color: #999; text-decoration: line-through; }
+
+        .daily-progress { background: linear-gradient(135deg, rgba(91,164,164,0.08), rgba(168,197,160,0.08)); border-radius: 20px; padding: 28px; margin-top: 24px; text-align: center; }
+        .daily-progress .bar-wrap { background: #eee; border-radius: 10px; height: 12px; margin: 16px 0; overflow: hidden; }
+        .daily-progress .bar-fill { height: 100%; background: linear-gradient(90deg, #5BA4A4, #A8C5A0); border-radius: 10px; transition: width 0.5s ease; }
+        .daily-progress .pct { font-size: 1.6rem; font-weight: 700; color: #5BA4A4; }
+
+        footer { padding: 32px 0; background-color: #2D3436; color: rgba(255,255,255,0.6); text-align: center; margin-top: auto; }
+        footer .footer-logo { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        footer p { font-size: 0.82rem; }
+
+        @media (max-width: 768px) {
+            .tips-grid { grid-template-columns: 1fr; }
+            .tabs { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo"><img src="images/logo-equi.png" alt="Equi"></a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="back-link">&#8592; Volver al Inicio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <div class="icon">&#127774;</div>
+            <h1>Bienestar <span>Integral</span></h1>
+            <p>Guias practicas sobre sueno, alimentacion y actividad fisica como pilares del bienestar emocional</p>
+        </div>
+    </header>
+
+    <section class="wellness-section">
+        <div class="container">
+            <div class="tabs">
+                <button class="tab active" data-tab="sueno">&#127769; Sueno</button>
+                <button class="tab" data-tab="nutricion">&#127860; Nutricion</button>
+                <button class="tab" data-tab="ejercicio">&#127939; Ejercicio</button>
+            </div>
+
+            <!-- SUENO -->
+            <div class="tab-panel active" id="panel-sueno">
+                <div class="tips-grid">
+                    <div class="tip-card"><div class="tip-icon">&#128717;</div><h4>Horario fijo</h4><p>Acuestate y levantate a la misma hora todos los dias, incluso los fines de semana. Tu cuerpo lo agradecera.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#128293;</div><h4>Sin pantallas antes de dormir</h4><p>Deja el telefono al menos 30 min antes de acostarte. La luz azul interfiere con la melatonina.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#127777;</div><h4>Ambiente fresco</h4><p>La temperatura ideal para dormir es entre 18-20 grados Celsius. Manten la habitacion fresca y oscura.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#9749;</div><h4>Sin cafeina tarde</h4><p>Evita el cafe y las bebidas con cafeina al menos 6 horas antes de dormir.</p></div>
+                </div>
+                <div class="checklist" id="checklist-sueno">
+                    <h3>Mi rutina nocturna</h3>
+                    <div class="check-item" data-key="s1"><div class="check-box"></div><span class="check-label">Apago las pantallas 30 min antes</span></div>
+                    <div class="check-item" data-key="s2"><div class="check-box"></div><span class="check-label">Hago una respiracion o meditacion corta</span></div>
+                    <div class="check-item" data-key="s3"><div class="check-box"></div><span class="check-label">Mantengo la habitacion fresca y oscura</span></div>
+                    <div class="check-item" data-key="s4"><div class="check-box"></div><span class="check-label">Me acuesto a la hora acostumbrada</span></div>
+                </div>
+                <div class="daily-progress"><p style="font-size:0.88rem;color:#666;">Progreso de hoy</p><div class="bar-wrap"><div class="bar-fill" id="bar-sueno" style="width:0%"></div></div><div class="pct" id="pct-sueno">0%</div></div>
+            </div>
+
+            <!-- NUTRICION -->
+            <div class="tab-panel" id="panel-nutricion">
+                <div class="tips-grid">
+                    <div class="tip-card"><div class="tip-icon">&#129361;</div><h4>Hidratacion</h4><p>Bebe al menos 8 vasos de agua al día. La deshidratación afecta tu animo y concentracion.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#129382;</div><h4>Frutas y verduras</h4><p>Incluye al menos 5 porciones diarias. Los colores en el plato significan variedad de nutrientes.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#127838;</div><h4>Carbohidratos complejos</h4><p>Avena, arroz integral y legumbres dan energia sostenida y estabilizan el humor.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#129472;</div><h4>Omega-3</h4><p>Pescado, nueces y semillas de linaza son esenciales para la salud cerebral y reducir inflamacion.</p></div>
+                </div>
+                <div class="checklist" id="checklist-nutricion">
+                    <h3>Mi checklist nutricional</h3>
+                    <div class="check-item" data-key="n1"><div class="check-box"></div><span class="check-label">Desayuno algo nutritivo</span></div>
+                    <div class="check-item" data-key="n2"><div class="check-box"></div><span class="check-label">Bebi suficiente agua</span></div>
+                    <div class="check-item" data-key="n3"><div class="check-box"></div><span class="check-label">Comi frutas o verduras</span></div>
+                    <div class="check-item" data-key="n4"><div class="check-box"></div><span class="check-label">Inclui proteinas en mi comida</span></div>
+                </div>
+                <div class="daily-progress"><p style="font-size:0.88rem;color:#666;">Progreso de hoy</p><div class="bar-wrap"><div class="bar-fill" id="bar-nutricion" style="width:0%"></div></div><div class="pct" id="pct-nutricion">0%</div></div>
+            </div>
+
+            <!-- EJERCICIO -->
+            <div class="tab-panel" id="panel-ejercicio">
+                <div class="tips-grid">
+                    <div class="tip-card"><div class="tip-icon">&#128694;</div><h4>Camina mas</h4><p>Intenta dar al menos 20 minutos de caminata al dia. Es uno de los mejores ejercicios para la salud mental.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#129336;</div><h4>Estiramiento</h4><p>5 minutos de estiramientos al dia reducen la tension muscular acumulada por estudiar.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#128170;</div><h4>Fuerza y resistencia</h4><p>Ejercicios de peso corporal como sentadillas y planchas fortalecen cuerpo y mente.</p></div>
+                    <div class="tip-card"><div class="tip-icon">&#128571;</div><h4>Disfruta el proceso</h4><p>Elige actividades que te gusten. Bailar, nadar, jugar... todo cuenta como ejercicio.</p></div>
+                </div>
+                <div class="checklist" id="checklist-ejercicio">
+                    <h3>Mi actividad de hoy</h3>
+                    <div class="check-item" data-key="e1"><div class="check-box"></div><span class="check-label">Me movi al menos 20 min</span></div>
+                    <div class="check-item" data-key="e2"><div class="check-box"></div><span class="check-label">Hice estiramientos</span></div>
+                    <div class="check-item" data-key="e3"><div class="check-box"></div><span class="check-label">Respiré aire fresco</span></div>
+                    <div class="check-item" data-key="e4"><div class="check-box"></div><span class="check-label">Descanse cuando lo necesite</span></div>
+                </div>
+                <div class="daily-progress"><p style="font-size:0.88rem;color:#666;">Progreso de hoy</p><div class="bar-wrap"><div class="bar-fill" id="bar-ejercicio" style="width:0%"></div></div><div class="pct" id="pct-ejercicio">0%</div></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-logo">Equi.</div>
+            <p>Creado con &#10084; por estudiantes universitarios</p>
+        </div>
+    </footer>
+
+    <script>
+        const today = new Date().toDateString();
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('.check-item').forEach(item => {
+            const key = item.dataset.key;
+            const saved = JSON.parse(localStorage.getItem('equi_wellness') || '{}');
+            if (saved[key] === today) item.classList.add('done');
+
+            item.addEventListener('click', () => {
+                const data = JSON.parse(localStorage.getItem('equi_wellness') || '{}');
+                if (item.classList.contains('done')) {
+                    item.classList.remove('done');
+                    delete data[key];
+                } else {
+                    item.classList.add('done');
+                    data[key] = today;
+                }
+                localStorage.setItem('equi_wellness', JSON.stringify(data));
+                updateProgress();
+            });
+        });
+
+        function updateProgress() {
+            ['sueno', 'nutricion', 'ejercicio'].forEach(section => {
+                const prefix = section === 'sueno' ? 's' : section === 'nutricion' ? 'n' : 'e';
+                const total = 4;
+                let done = 0;
+                for (let i = 1; i <= total; i++) {
+                    const data = JSON.parse(localStorage.getItem('equi_wellness') || '{}');
+                    if (data[prefix + i] === today) done++;
+                }
+                const pct = Math.round((done / total) * 100);
+                document.getElementById('bar-' + section).style.width = pct + '%';
+                document.getElementById('pct-' + section).textContent = pct + '%';
+            });
+        }
+
+        updateProgress();
+    </script>
+</body>
+</html>

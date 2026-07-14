@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicios de Respiracion — Equi</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #2D3436; background-color: #FFFDF9; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 50px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background-color: #5BA4A4; color: #fff; box-shadow: 0 4px 20px rgba(91,164,164,0.3); }
+        .btn-primary:hover { background-color: #4E9494; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; padding: 16px 0; background-color: rgba(255,253,249,0.95); backdrop-filter: blur(12px); box-shadow: 0 1px 12px rgba(0,0,0,0.05); }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { display: flex; align-items: center; }
+        .nav-logo img { height: 40px; }
+        .nav-links { display: flex; list-style: none; gap: 28px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: #5BA4A4; }
+        .nav-links .back-link { color: #5BA4A4; font-weight: 600; }
+
+        .page-header { padding: 140px 0 60px; text-align: center; background: linear-gradient(160deg, #FFFDF9 0%, #E8F6F3 50%, #FFFDF9 100%); }
+        .page-header .icon { font-size: 3rem; margin-bottom: 16px; }
+        .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 12px; }
+        .page-header h1 span { color: #5BA4A4; }
+        .page-header p { font-size: 1.05rem; color: #666; max-width: 500px; margin: 0 auto; }
+
+        .breathing-section { padding: 60px 0 80px; flex: 1; }
+
+        .technique-selector { display: flex; gap: 12px; justify-content: center; margin-bottom: 48px; flex-wrap: wrap; }
+        .technique-btn { padding: 10px 24px; border-radius: 50px; border: 2px solid #eee; background: #fff; font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+        .technique-btn:hover, .technique-btn.active { border-color: #5BA4A4; background: rgba(91,164,164,0.08); color: #5BA4A4; }
+
+        .exercise-area { display: flex; flex-direction: column; align-items: center; }
+
+        .breath-circle-wrap { width: 260px; height: 260px; position: relative; margin-bottom: 32px; }
+        .breath-circle { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, rgba(91,164,164,0.15), rgba(168,197,160,0.15)); display: flex; align-items: center; justify-content: center; transition: transform 4s ease-in-out; }
+        .breath-circle.inhale { transform: scale(1.4); }
+        .breath-circle.exhale { transform: scale(1); }
+        .breath-circle.hold { transform: scale(1.4); }
+        .breath-circle .inner-text { font-size: 1.1rem; font-weight: 600; color: #5BA4A4; text-align: center; }
+
+        .phase-indicator { font-size: 1.5rem; font-weight: 700; color: #5BA4A4; margin-bottom: 8px; min-height: 40px; }
+        .phase-timer { font-size: 2.5rem; font-weight: 800; color: #2D3436; margin-bottom: 32px; }
+
+        .controls { display: flex; gap: 16px; margin-bottom: 32px; }
+        .controls .btn { min-width: 140px; justify-content: center; }
+
+        .technique-info { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); max-width: 500px; width: 100%; }
+        .technique-info h3 { font-size: 1.1rem; margin-bottom: 8px; }
+        .technique-info p { font-size: 0.9rem; color: #666; line-height: 1.8; margin-bottom: 12px; }
+        .technique-info .steps { list-style: none; }
+        .technique-info .steps li { padding: 6px 0; font-size: 0.9rem; color: #555; display: flex; align-items: center; gap: 8px; }
+        .technique-info .steps li::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #5BA4A4; flex-shrink: 0; }
+
+        .session-counter { text-align: center; margin-top: 40px; }
+        .session-counter .num { font-size: 2rem; font-weight: 700; color: #5BA4A4; }
+        .session-counter .lbl { font-size: 0.82rem; color: #999; }
+
+        footer { padding: 32px 0; background-color: #2D3436; color: rgba(255,255,255,0.6); text-align: center; margin-top: auto; }
+        footer .footer-logo { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        footer p { font-size: 0.82rem; }
+
+        @media (max-width: 768px) {
+            .breath-circle-wrap { width: 200px; height: 200px; }
+            .technique-selector { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo"><img src="images/logo-equi.png" alt="Equi"></a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="back-link">&#8592; Volver al Inicio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <div class="icon">&#127796;</div>
+            <h1>Ejercicios de <span>Respiracion</span></h1>
+            <p>Tecnicas respaldadas por la ciencia para reducir la ansiedad y mejorar tu enfoque</p>
+        </div>
+    </header>
+
+    <section class="breathing-section">
+        <div class="container">
+            <div class="technique-selector">
+                <button class="technique-btn active" data-technique="478">4-7-8</button>
+                <button class="technique-btn" data-technique="box">Caja</button>
+                <button class="technique-btn" data-technique="coherencia">Coherencia</button>
+                <button class="technique-btn" data-technique="diafragmatica">Diafragmatica</button>
+            </div>
+
+            <div class="exercise-area">
+                <div class="breath-circle-wrap">
+                    <div class="breath-circle" id="breathCircle">
+                        <span class="inner-text" id="breathInstruction">Preparado</span>
+                    </div>
+                </div>
+
+                <div class="phase-indicator" id="phaseIndicator">Elige una tecnica</div>
+                <div class="phase-timer" id="phaseTimer">--</div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn">Iniciar</button>
+                </div>
+
+                <div class="technique-info" id="techniqueInfo">
+                    <h3>Respiracion 4-7-8</h3>
+                    <p>Desarrollada por el Dr. Andrew Weil. Ideal para relajarse rapidamente y conciliar el sueno.</p>
+                    <ul class="steps">
+                        <li>Inhala por la nariz durante 4 segundos</li>
+                        <li>Sostiene la respiracion durante 7 segundos</li>
+                        <li>Exhala lentamente por la boca durante 8 segundos</li>
+                        <li>Repite 4 ciclos</li>
+                    </ul>
+                </div>
+
+                <div class="session-counter">
+                    <div class="num" id="totalCycles">0</div>
+                    <div class="lbl">Ciclos completados hoy</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-logo">Equi.</div>
+            <p>Creado con &#10084; por estudiantes universitarios</p>
+        </div>
+    </footer>
+
+    <script>
+        const techniques = {
+            '478': { name: 'Respiracion 4-7-8', desc: 'Desarrollada por el Dr. Andrew Weil. Ideal para relajarse rapidamente y conciliar el sueno.', phases: [{ name: 'Inhala', duration: 4 }, { name: 'Sostiene', duration: 7 }, { name: 'Exhala', duration: 8 }], cycles: 4 },
+            'box': { name: 'Respiracion en Caja', desc: 'Tecnica utilizada por atletas y militares para controlar el estres y mantener la calma.', phases: [{ name: 'Inhala', duration: 4 }, { name: 'Sostiene', duration: 4 }, { name: 'Exhala', duration: 4 }, { name: 'Sostiene', duration: 4 }], cycles: 4 },
+            'coherencia': { name: 'Respiracion de Coherencia', desc: 'Sincroniza tu ritmo cardiaco con la respiracion. Reduce la ansiedad y mejora el enfoque.', phases: [{ name: 'Inhala', duration: 5 }, { name: 'Exhala', duration: 5 }], cycles: 6 },
+            'diafragmatica': { name: 'Respiracion Diafragmatica', desc: 'Activacion del nervio vago para reducir la respuesta de lucha o huida del cuerpo.', phases: [{ name: 'Inhala (vientre)', duration: 5 }, { name: 'Exhala (vientre)', duration: 6 }], cycles: 5 }
+        };
+
+        let currentTechnique = '478';
+        let isRunning = false;
+        let phaseTimeout = null;
+        let totalCycles = parseInt(localStorage.getItem('equi_breathing_cycles') || '0');
+
+        const breathCircle = document.getElementById('breathCircle');
+        const breathInstruction = document.getElementById('breathInstruction');
+        const phaseIndicator = document.getElementById('phaseIndicator');
+        const phaseTimer = document.getElementById('phaseTimer');
+        const startBtn = document.getElementById('startBtn');
+        const techniqueInfo = document.getElementById('techniqueInfo');
+
+        function updateInfo() {
+            const t = techniques[currentTechnique];
+            techniqueInfo.innerHTML = `<h3>${t.name}</h3><p>${t.desc}</p><ul class="steps">${t.phases.map(p => `<li>${p.name}: ${p.duration} segundos</li>`).join('')}<li>Ciclos: ${t.cycles}</li></ul>`;
+        }
+
+        document.querySelectorAll('.technique-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isRunning) return;
+                document.querySelectorAll('.technique-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTechnique = btn.dataset.technique;
+                updateInfo();
+            });
+        });
+
+        function startExercise() {
+            if (isRunning) { stopExercise(); return; }
+            isRunning = true;
+            startBtn.textContent = 'Detener';
+            runPhases(techniques[currentTechnique].phases, 0, techniques[currentTechnique].cycles);
+        }
+
+        function stopExercise() {
+            isRunning = false;
+            clearTimeout(phaseTimeout);
+            startBtn.textContent = 'Iniciar';
+            breathCircle.className = 'breath-circle';
+            breathInstruction.textContent = 'Preparado';
+            phaseIndicator.textContent = 'Elige una tecnica';
+            phaseTimer.textContent = '--';
+        }
+
+        function runPhases(phases, cycleIndex, totalCyclesCount) {
+            if (cycleIndex >= totalCyclesCount) {
+                totalCycles++;
+                localStorage.setItem('equi_breathing_cycles', totalCycles);
+                document.getElementById('totalCycles').textContent = totalCycles;
+                stopExercise();
+                phaseIndicator.textContent = 'Sesion completada!';
+                return;
+            }
+            let phaseIdx = 0;
+            function nextPhase() {
+                if (!isRunning || phaseIdx >= phases.length) {
+                    if (phaseIdx >= phases.length) runPhases(phases, cycleIndex + 1, totalCyclesCount);
+                    return;
+                }
+                const phase = phases[phaseIdx];
+                phaseIndicator.textContent = `Ciclo ${cycleIndex + 1}/${totalCyclesCount}`;
+                breathInstruction.textContent = phase.name;
+                if (phase.name.includes('Inhala')) breathCircle.className = 'breath-circle inhale';
+                else if (phase.name.includes('Exhala')) breathCircle.className = 'breath-circle exhale';
+                else breathCircle.className = 'breath-circle hold';
+
+                let remaining = phase.duration;
+                phaseTimer.textContent = remaining;
+                const interval = setInterval(() => {
+                    remaining--;
+                    phaseTimer.textContent = remaining;
+                    if (remaining <= 0) { clearInterval(interval); phaseIdx++; nextPhase(); }
+                }, 1000);
+                phaseTimeout = setTimeout(() => {}, 100000);
+            }
+            nextPhase();
+        }
+
+        startBtn.addEventListener('click', startExercise);
+        document.getElementById('totalCycles').textContent = totalCycles;
+        updateInfo();
+    </script>
+</body>
+</html>

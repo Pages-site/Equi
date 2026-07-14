@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meditacion Guiada — Equi</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #2D3436; background-color: #FFFDF9; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 50px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background-color: #5BA4A4; color: #fff; box-shadow: 0 4px 20px rgba(91, 164, 164, 0.3); }
+        .btn-primary:hover { background-color: #4E9494; }
+        .btn-secondary { background-color: transparent; color: #2D3436; border: 2px solid #ddd; }
+        .btn-secondary:hover { border-color: #5BA4A4; color: #5BA4A4; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; padding: 16px 0; background-color: rgba(255,253,249,0.95); backdrop-filter: blur(12px); box-shadow: 0 1px 12px rgba(0,0,0,0.05); }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.3rem; }
+        .nav-logo img { height: 40px; }
+        .nav-links { display: flex; list-style: none; gap: 28px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; color: #2D3436; transition: color 0.3s; }
+        .nav-links a:hover { color: #5BA4A4; }
+        .nav-links .back-link { color: #5BA4A4; font-weight: 600; }
+
+        .page-header { padding: 140px 0 60px; text-align: center; background: linear-gradient(160deg, #FFFDF9 0%, #E8F6F3 50%, #FFFDF9 100%); }
+        .page-header .icon { font-size: 3rem; margin-bottom: 16px; }
+        .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 12px; }
+        .page-header h1 span { color: #5BA4A4; }
+        .page-header p { font-size: 1.05rem; color: #666; max-width: 500px; margin: 0 auto; }
+
+        .meditation-section { padding: 60px 0 80px; flex: 1; }
+
+        .session-types { display: flex; gap: 12px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+        .session-type { padding: 10px 24px; border-radius: 50px; border: 2px solid #eee; background: #fff; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+        .session-type:hover, .session-type.active { border-color: #5BA4A4; background-color: rgba(91,164,164,0.08); color: #5BA4A4; }
+
+        .timer-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
+        .timer-circle { width: 280px; height: 280px; position: relative; margin-bottom: 32px; }
+        .timer-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .timer-circle .bg { fill: none; stroke: #eee; stroke-width: 6; }
+        .timer-circle .progress { fill: none; stroke: #5BA4A4; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+        .timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .timer-text .time { font-size: 3.2rem; font-weight: 700; color: #2D3436; letter-spacing: 2px; }
+        .timer-text .label { font-size: 0.85rem; color: #999; margin-top: 4px; }
+
+        .timer-controls { display: flex; gap: 16px; align-items: center; }
+        .control-btn { width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .control-btn.play { background-color: #5BA4A4; color: #fff; width: 64px; height: 64px; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(91,164,164,0.3); }
+        .control-btn.play:hover { background-color: #4E9494; transform: scale(1.05); }
+        .control-btn.secondary { background-color: #f0f0f0; color: #666; }
+        .control-btn.secondary:hover { background-color: #e0e0e0; }
+
+        .breathing-guide { text-align: center; margin-top: 32px; padding: 24px; background: rgba(91,164,164,0.05); border-radius: 16px; display: none; }
+        .breathing-guide.active { display: block; }
+        .breathing-dot { width: 16px; height: 16px; border-radius: 50%; background: #5BA4A4; margin: 0 auto 12px; animation: breathe 8s ease-in-out infinite; }
+        @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.5; } 25% { transform: scale(2); opacity: 1; } 50% { transform: scale(2); opacity: 1; } 75% { transform: scale(1); opacity: 0.5; } }
+        .breathing-text { font-size: 1rem; color: #5BA4A4; font-weight: 500; }
+
+        .session-complete { display: none; text-align: center; padding: 40px; background: rgba(91,164,164,0.05); border-radius: 20px; }
+        .session-complete.active { display: block; }
+        .session-complete .icon { font-size: 3rem; margin-bottom: 12px; }
+        .session-complete h3 { font-size: 1.4rem; margin-bottom: 8px; }
+        .session-complete p { color: #666; margin-bottom: 20px; }
+
+        .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+        .stat-card { text-align: center; padding: 20px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .stat-card .num { font-size: 1.6rem; font-weight: 700; color: #5BA4A4; }
+        .stat-card .lbl { font-size: 0.78rem; color: #999; margin-top: 4px; }
+
+        footer { padding: 32px 0; background-color: #2D3436; color: rgba(255,255,255,0.6); text-align: center; margin-top: auto; }
+        footer .footer-logo { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        footer p { font-size: 0.82rem; }
+
+        @media (max-width: 768px) {
+            .nav-links { gap: 16px; }
+            .timer-circle { width: 220px; height: 220px; }
+            .timer-text .time { font-size: 2.4rem; }
+            .stats-bar { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/logo-equi.png" alt="Equi">
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="back-link">&#8592; Volver al Inicio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <div class="icon">&#129502;</div>
+            <h1>Meditacion <span>Guiada</span></h1>
+            <p>Sesiones de 5 a 15 minutos para encontrar calma y atencion plena en tu dia</p>
+        </div>
+    </header>
+
+    <section class="meditation-section">
+        <div class="container">
+            <div class="session-types">
+                <button class="session-type active" data-duration="300">5 min</button>
+                <button class="session-type" data-duration="600">10 min</button>
+                <button class="session-type" data-duration="900">15 min</button>
+            </div>
+
+            <div class="timer-container">
+                <div class="timer-circle">
+                    <svg viewBox="0 0 200 200">
+                        <circle class="bg" cx="100" cy="100" r="90"></circle>
+                        <circle class="progress" id="progressCircle" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+                    </svg>
+                    <div class="timer-text">
+                        <div class="time" id="timerDisplay">5:00</div>
+                        <div class="label" id="timerLabel">Listo para comenzar</div>
+                    </div>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="control-btn secondary" id="resetBtn" title="Reiniciar">&#8634;</button>
+                    <button class="control-btn play" id="playBtn" title="Iniciar">&#9654;</button>
+                </div>
+
+                <div class="breathing-guide" id="breathingGuide">
+                    <div class="breathing-dot"></div>
+                    <div class="breathing-text" id="breathingText">Inhala... 4s</div>
+                </div>
+            </div>
+
+            <div class="session-complete" id="sessionComplete">
+                <div class="icon">&#127793;</div>
+                <h3>¡Sesion Completada!</h3>
+                <p>Has meditado durante <span id="completedTime">5</span> minutos. Tu mente te lo agradecera.</p>
+                <button class="btn btn-primary" onclick="resetSession()">Nueva Sesion</button>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="num" id="totalSessions">0</div>
+                    <div class="lbl">Sesiones totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num" id="totalMinutes">0</div>
+                    <div class="lbl">Minutos totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num" id="currentStreak">0</div>
+                    <div class="lbl">Racha actual (dias)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-logo">Equi.</div>
+            <p>Creado con &#10084; por estudiantes universitarios</p>
+        </div>
+    </footer>
+
+    <script>
+        let duration = 300;
+        let remaining = duration;
+        let timerInterval = null;
+        let isRunning = false;
+        const circumference = 2 * Math.PI * 90;
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerLabel = document.getElementById('timerLabel');
+        const progressCircle = document.getElementById('progressCircle');
+        const playBtn = document.getElementById('playBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const breathingGuide = document.getElementById('breathingGuide');
+        const breathingText = document.getElementById('breathingText');
+        const sessionComplete = document.getElementById('sessionComplete');
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return m + ':' + String(sec).padStart(2, '0');
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(remaining);
+            const offset = circumference * (1 - remaining / duration);
+            progressCircle.style.strokeDashoffset = offset;
+        }
+
+        function startTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                playBtn.innerHTML = '&#9654;';
+                timerLabel.textContent = 'Pausado';
+                breathingGuide.classList.remove('active');
+                return;
+            }
+            isRunning = true;
+            playBtn.innerHTML = '&#10074;&#10074;';
+            timerLabel.textContent = 'Meditando...';
+            breathingGuide.classList.add('active');
+            timerInterval = setInterval(() => {
+                remaining--;
+                updateDisplay();
+                updateBreathingText();
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    completeSession();
+                }
+            }, 1000);
+        }
+
+        function updateBreathingText() {
+            const cyclePos = (duration - remaining) % 8;
+            if (cyclePos < 4) breathingText.textContent = 'Inhala... ' + (4 - cyclePos) + 's';
+            else if (cyclePos < 6) breathingText.textContent = 'Sostiene... ' + (6 - cyclePos) + 's';
+            else if (cyclePos < 8) breathingText.textContent = 'Exhala... ' + (8 - cyclePos) + 's';
+        }
+
+        function completeSession() {
+            playBtn.innerHTML = '&#9654;';
+            breathingGuide.classList.remove('active');
+            timerLabel.textContent = 'Completado';
+            document.querySelector('.timer-container').style.display = 'none';
+            document.querySelector('.session-types').style.display = 'none';
+            document.getElementById('completedTime').textContent = Math.round(duration / 60);
+            sessionComplete.classList.add('active');
+            saveSession();
+        }
+
+        function resetSession() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            remaining = duration;
+            playBtn.innerHTML = '&#9654;';
+            timerLabel.textContent = 'Listo para comenzar';
+            progressCircle.style.strokeDashoffset = 0;
+            breathingGuide.classList.remove('active');
+            sessionComplete.classList.remove('active');
+            document.querySelector('.timer-container').style.display = '';
+            document.querySelector('.session-types').style.display = '';
+            updateDisplay();
+        }
+
+        function saveSession() {
+            const data = JSON.parse(localStorage.getItem('equi_meditation') || '{"sessions":0,"minutes":0,"streak":0,"lastDate":""}');
+            const today = new Date().toDateString();
+            data.sessions++;
+            data.minutes += Math.round(duration / 60);
+            if (data.lastDate !== today) {
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+                data.streak = (data.lastDate === yesterday) ? data.streak + 1 : 1;
+                data.lastDate = today;
+            }
+            localStorage.setItem('equi_meditation', JSON.stringify(data));
+            loadStats();
+        }
+
+        function loadStats() {
+            const data = JSON.parse(localStorage.getItem('equi_meditation') || '{"sessions":0,"minutes":0,"streak":0}');
+            document.getElementById('totalSessions').textContent = data.sessions;
+            document.getElementById('totalMinutes').textContent = data.minutes;
+            document.getElementById('currentStreak').textContent = data.streak;
+        }
+
+        document.querySelectorAll('.session-type').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isRunning) return;
+                document.querySelectorAll('.session-type').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                duration = parseInt(btn.dataset.duration);
+                remaining = duration;
+                updateDisplay();
+            });
+        });
+
+        playBtn.addEventListener('click', startTimer);
+        resetBtn.addEventListener('click', resetSession);
+
+        loadStats();
+        updateDisplay();
+    </script>
+</body>
+</html>

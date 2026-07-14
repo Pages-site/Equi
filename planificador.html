@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificador Inteligente — Equi</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #2D3436; background-color: #FFFDF9; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background-color: #5BA4A4; color: #fff; box-shadow: 0 4px 20px rgba(91,164,164,0.3); }
+        .btn-primary:hover { background-color: #4E9494; }
+        .btn-sm { padding: 8px 16px; font-size: 0.82rem; border-radius: 10px; }
+        .btn-ghost { background: transparent; color: #E17055; }
+        .btn-ghost:hover { background: rgba(225,112,85,0.1); }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; padding: 16px 0; background-color: rgba(255,253,249,0.95); backdrop-filter: blur(12px); box-shadow: 0 1px 12px rgba(0,0,0,0.05); }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { display: flex; align-items: center; }
+        .nav-logo img { height: 40px; }
+        .nav-links { display: flex; list-style: none; gap: 28px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: #5BA4A4; }
+        .nav-links .back-link { color: #5BA4A4; font-weight: 600; }
+
+        .page-header { padding: 140px 0 40px; text-align: center; background: linear-gradient(160deg, #FFFDF9 0%, #E8F6F3 50%, #FFFDF9 100%); }
+        .page-header .icon { font-size: 3rem; margin-bottom: 16px; }
+        .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 12px; }
+        .page-header h1 span { color: #5BA4A4; }
+        .page-header p { font-size: 1.05rem; color: #666; max-width: 520px; margin: 0 auto; }
+
+        .planner-section { padding: 40px 0 80px; flex: 1; }
+
+        .planner-layout { display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+        .task-panel { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); }
+        .task-panel h3 { font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+        .add-task-form { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .add-task-form input { flex: 1; min-width: 150px; padding: 10px 16px; border: 2px solid #eee; border-radius: 10px; font-size: 0.9rem; font-family: inherit; outline: none; transition: border-color 0.3s; }
+        .add-task-form input:focus { border-color: #5BA4A4; }
+        .add-task-form select { padding: 10px 12px; border: 2px solid #eee; border-radius: 10px; font-size: 0.85rem; font-family: inherit; outline: none; cursor: pointer; background: #fff; }
+        .add-task-form select:focus { border-color: #5BA4A4; }
+
+        .task-list { list-style: none; }
+        .task-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; transition: opacity 0.3s; }
+        .task-item:last-child { border-bottom: none; }
+        .task-item.completed .task-name { text-decoration: line-through; color: #bbb; }
+        .task-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid #ddd; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; }
+        .task-item.completed .task-check { background: #5BA4A4; border-color: #5BA4A4; }
+        .task-check::after { content: ''; display: none; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px; }
+        .task-item.completed .task-check::after { display: block; }
+        .task-name { flex: 1; font-size: 0.92rem; }
+        .task-priority { padding: 3px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+        .priority-alta { background: rgba(225,112,85,0.1); color: #E17055; }
+        .priority-media { background: rgba(253,203,110,0.2); color: #D4A017; }
+        .priority-baja { background: rgba(91,164,164,0.1); color: #5BA4A4; }
+        .task-delete { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; transition: color 0.3s; padding: 4px; }
+        .task-delete:hover { color: #E17055; }
+        .no-tasks { text-align: center; padding: 30px; color: #bbb; font-size: 0.9rem; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+        .calendar-widget { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .calendar-header h4 { font-size: 1rem; }
+        .calendar-nav { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: #5BA4A4; padding: 4px 8px; border-radius: 8px; transition: background 0.3s; }
+        .calendar-nav:hover { background: rgba(91,164,164,0.1); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+        .calendar-day-header { font-size: 0.72rem; color: #999; font-weight: 600; padding: 4px 0; }
+        .calendar-day { padding: 6px 0; font-size: 0.82rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .calendar-day:hover { background: rgba(91,164,164,0.1); }
+        .calendar-day.today { background: #5BA4A4; color: #fff; font-weight: 600; }
+        .calendar-day.has-event { position: relative; }
+        .calendar-day.has-event::after { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: #E17055; }
+        .calendar-day.other-month { color: #ddd; }
+
+        .reminders-panel { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); }
+        .reminders-panel h4 { font-size: 1rem; margin-bottom: 12px; }
+        .reminder-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.88rem; }
+        .reminder-item:last-child { border-bottom: none; }
+        .reminder-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .reminder-time { color: #999; font-size: 0.78rem; margin-left: auto; white-space: nowrap; }
+        .add-reminder-form { display: flex; gap: 6px; margin-top: 12px; }
+        .add-reminder-form input { flex: 1; padding: 8px 12px; border: 2px solid #eee; border-radius: 8px; font-size: 0.85rem; font-family: inherit; outline: none; }
+        .add-reminder-form input:focus { border-color: #5BA4A4; }
+        .add-reminder-form button { padding: 8px 12px; border-radius: 8px; border: none; background: #5BA4A4; color: #fff; cursor: pointer; font-size: 0.85rem; }
+
+        .view-toggle { display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; }
+        .view-btn { padding: 8px 20px; border-radius: 50px; border: 2px solid #eee; background: #fff; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+        .view-btn:hover, .view-btn.active { border-color: #5BA4A4; color: #5BA4A4; background: rgba(91,164,164,0.08); }
+
+        .weekly-view { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 20px; }
+        .day-column { background: #fff; border-radius: 12px; padding: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.03); min-height: 120px; }
+        .day-column-header { font-size: 0.78rem; font-weight: 600; color: #5BA4A4; margin-bottom: 8px; text-align: center; }
+        .day-column.today-col { border: 2px solid #5BA4A4; }
+        .day-task { padding: 6px 8px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 4px; background: rgba(91,164,164,0.08); color: #555; }
+
+        footer { padding: 32px 0; background-color: #2D3436; color: rgba(255,255,255,0.6); text-align: center; margin-top: auto; }
+        footer .footer-logo { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        footer p { font-size: 0.82rem; }
+
+        @media (max-width: 900px) {
+            .planner-layout { grid-template-columns: 1fr; }
+            .weekly-view { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .weekly-view { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo"><img src="images/logo-equi.png" alt="Equi"></a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="back-link">&#8592; Volver al Inicio</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <div class="icon">&#128197;</div>
+            <h1>Planificador <span>Inteligente</span></h1>
+            <p>Organiza tu vida universitaria y gana control sobre tu tiempo</p>
+        </div>
+    </header>
+
+    <section class="planner-section">
+        <div class="container">
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="weekly">Vista Semanal</button>
+                <button class="view-btn" data-view="list">Lista de Tareas</button>
+            </div>
+
+            <div id="weeklyView" class="weekly-view"></div>
+
+            <div id="listView" class="planner-layout" style="display:none;">
+                <div class="task-panel">
+                    <h3>&#128203; Mis Tareas</h3>
+                    <div class="add-task-form">
+                        <input type="text" id="taskInput" placeholder="Nueva tarea...">
+                        <select id="prioritySelect">
+                            <option value="baja">Baja</option>
+                            <option value="media" selected>Media</option>
+                            <option value="alta">Alta</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" id="addTaskBtn">+</button>
+                    </div>
+                    <ul class="task-list" id="taskList"></ul>
+                </div>
+                <div class="sidebar">
+                    <div class="calendar-widget" id="calendarWidget"></div>
+                    <div class="reminders-panel">
+                        <h4>&#128276; Recordatorios</h4>
+                        <div id="reminderList"></div>
+                        <div class="add-reminder-form">
+                            <input type="text" id="reminderInput" placeholder="Nuevo recordatorio...">
+                            <input type="time" id="reminderTime">
+                            <button id="addReminderBtn">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-logo">Equi.</div>
+            <p>Creado con &#10084; por estudiantes universitarios</p>
+        </div>
+    </footer>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('equi_tasks') || '[]');
+        let reminders = JSON.parse(localStorage.getItem('equi_reminders') || '[]');
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        function saveTasks() { localStorage.setItem('equi_tasks', JSON.stringify(tasks)); }
+        function saveReminders() { localStorage.setItem('equi_reminders', JSON.stringify(reminders)); }
+
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if (btn.dataset.view === 'weekly') {
+                    document.getElementById('weeklyView').style.display = '';
+                    document.getElementById('listView').style.display = 'none';
+                } else {
+                    document.getElementById('weeklyView').style.display = 'none';
+                    document.getElementById('listView').style.display = '';
+                }
+            });
+        });
+
+        document.getElementById('addTaskBtn').addEventListener('click', () => {
+            const input = document.getElementById('taskInput');
+            const name = input.value.trim();
+            if (!name) return;
+            tasks.push({ id: Date.now(), name, priority: document.getElementById('prioritySelect').value, completed: false, date: new Date().toISOString() });
+            saveTasks(); renderTasks(); renderWeekly();
+            input.value = '';
+        });
+
+        document.getElementById('taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('addTaskBtn').click(); });
+
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            if (tasks.length === 0) { list.innerHTML = '<div class="no-tasks">No hay tareas. Agrega una arriba.</div>'; return; }
+            const sorted = [...tasks].sort((a, b) => { const order = { alta: 0, media: 1, baja: 2 }; return order[a.priority] - order[b.priority]; });
+            list.innerHTML = sorted.map(t => `
+                <li class="task-item ${t.completed ? 'completed' : ''}">
+                    <div class="task-check" onclick="toggleTask(${t.id})"></div>
+                    <span class="task-name">${t.name}</span>
+                    <span class="task-priority priority-${t.priority}">${t.priority}</span>
+                    <button class="task-delete" onclick="deleteTask(${t.id})">&#10005;</button>
+                </li>
+            `).join('');
+        }
+
+        function toggleTask(id) {
+            const t = tasks.find(x => x.id === id);
+            if (t) t.completed = !t.completed;
+            saveTasks(); renderTasks(); renderWeekly();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(x => x.id !== id);
+            saveTasks(); renderTasks(); renderWeekly();
+        }
+
+        function renderWeekly() {
+            const days = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            const dayOfWeek = today.getDay();
+            startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+            const container = document.getElementById('weeklyView');
+            container.innerHTML = days.map((day, i) => {
+                const d = new Date(startOfWeek);
+                d.setDate(startOfWeek.getDate() + i);
+                const isToday = d.toDateString() === today.toDateString();
+                const dayTasks = tasks.filter(t => { const td = new Date(t.date); return td.toDateString() === d.toDateString(); });
+                return `<div class="day-column ${isToday ? 'today-col' : ''}">
+                    <div class="day-column-header">${day} ${d.getDate()}</div>
+                    ${dayTasks.map(t => `<div class="day-task" style="opacity:${t.completed ? 0.5 : 1};text-decoration:${t.completed ? 'line-through' : 'none'}">${t.name}</div>`).join('')}
+                </div>`;
+            }).join('');
+        }
+
+        function renderCalendar() {
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+            const adjustedFirst = firstDay === 0 ? 6 : firstDay - 1;
+            let html = `<div class="calendar-header">
+                <button class="calendar-nav" onclick="changeMonth(-1)">&#8249;</button>
+                <h4>${monthNames[currentMonth]} ${currentYear}</h4>
+                <button class="calendar-nav" onclick="changeMonth(1)">&#8250;</button>
+            </div><div class="calendar-grid">`;
+            ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].forEach(d => html += `<div class="calendar-day-header">${d}</div>`);
+            for (let i = 0; i < adjustedFirst; i++) html += '<div class="calendar-day other-month"></div>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = new Date(currentYear, currentMonth, d).toDateString();
+                const isToday = today.getDate() === d && today.getMonth() === currentMonth && today.getFullYear() === currentYear;
+                const hasEvent = tasks.some(t => new Date(t.date).toDateString() === dateStr);
+                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''}">${d}</div>`;
+            }
+            html += '</div>';
+            document.getElementById('calendarWidget').innerHTML = html;
+        }
+
+        function changeMonth(dir) {
+            currentMonth += dir;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderCalendar();
+        }
+
+        document.getElementById('addReminderBtn').addEventListener('click', () => {
+            const text = document.getElementById('reminderInput').value.trim();
+            const time = document.getElementById('reminderTime').value;
+            if (!text) return;
+            reminders.push({ id: Date.now(), text, time: time || 'Sin hora', color: '#5BA4A4' });
+            saveReminders(); renderReminders();
+            document.getElementById('reminderInput').value = '';
+        });
+
+        function renderReminders() {
+            const container = document.getElementById('reminderList');
+            if (reminders.length === 0) { container.innerHTML = '<div style="text-align:center;color:#bbb;font-size:0.85rem;padding:12px;">No hay recordatorios</div>'; return; }
+            container.innerHTML = reminders.map(r => `
+                <div class="reminder-item">
+                    <div class="reminder-dot" style="background:${r.color}"></div>
+                    <span>${r.text}</span>
+                    <span class="reminder-time">${r.time}</span>
+                </div>
+            `).join('');
+        }
+
+        renderTasks(); renderWeekly(); renderCalendar(); renderReminders();
+    </script>
+</body>
+</html>
