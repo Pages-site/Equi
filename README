@@ -1,143 +1,117 @@
 # Equi — Bienestar Emocional
 
-Pagina web para promover la salud emocional entre estudiantes universitarios.
+Este proyecto es una plataforma web para promover la salud emocional en la comunidad universitaria. Está optimizado para ser desarrollado, editado y previsualizado en **Visual Studio Code**.
 
-## Estructura del Proyecto
+---
 
-```
-project/
-  index.html            ← Pagina principal
-  meditacion.html       ← Meditacion guiada
-  diario.html           ← Diario emocional
-  respiracion.html      ← Ejercicios de respiracion
-  bienestar.html        ← Bienestar integral
-  planificador.html     ← Planificador inteligente
-  pausas.html           ← Pausas activas
-  comunidad.html        ← Comunidad virtual
-  script.js             ← JavaScript (menu hamburguesa, scroll, formulario)
-  images/
-    logo-equi.png       ← Logo utilizado en 2 partes de la pagina
-  #*.html               ← Archivos de respaldo (no incluir en publicacion)
+## 📂 Estructura del Proyecto en VS Code
+
+Asegúrate de abrir la carpeta raíz del proyecto en Visual Studio Code para que las rutas relativas de las imágenes funcionen de forma correcta:
+
+```text
+EQUI-PROJECT/
+├── index.html            # Archivo HTML corregido (con estructura limpia)
+├── script.js             # Lógica e interacciones del sitio
+├── README.md             # Este archivo de documentación
+├── images/               # Carpeta obligatoria para recursos multimedia
+│   └── logo-equi.png     # Logo del proyecto
+└── publish.py            # Script en Python para corregir HTML y publicar
 ```
 
-## Ubicacion del Logo (`images/logo-equi.png`)
+> ⚠️ **Importante:** La carpeta de imágenes debe llamarse estrictamente `images` (en minúsculas) para que coincida con las rutas relativas del HTML: `src="images/logo-equi.png"`.
 
-El logo se carga desde **2 ubicaciones** en `index.html`:
+---
 
-### 1. Barra de navegacion (navbar)
-```html
-<a href="#inicio" class="nav-logo">
-    <img src="images/logo-equi.png" alt="Logo Equi" class="logo">
-</a>
-```
-- Clase CSS: `.nav-logo img`
-- Ancho fijo: `width: 120px`, Alto: `height: 50px`
+## 🛠️ Desarrollo en Visual Studio Code
 
-### 2. Seccion Hero (principal)
-```html
-<div class="hero-logo">
-    <img src="images/logo-equi.png" alt="Logo Equi" class="logo">
-</div>
-```
-- Clase CSS: `.hero-logo img`
-- Ancho fijo: `width: 200px`, Alto: automatico
+Para trabajar de la manera más cómoda y asegurar que las imágenes se publiquen y visualicen correctamente, te recomendamos instalar las siguientes extensiones en VS Code:
 
-> **REGLA CLAVE:** La ruta siempre es `images/logo-equi.png` (relativa a index.html). La carpeta `images/` debe estar en la misma nivel que `index.html`.
+1. **Live Server** (de Ritwick Dey):
+   * Permite lanzar un servidor de desarrollo local con un solo clic.
+   * Evita problemas de carga de imágenes causados por el protocolo `file://`.
+   * **Instrucciones:** Haz clic derecho sobre `index.html` y selecciona **"Open with Live Server"**.
 
-## Errores Conocidos en el Codigo
+2. **Python** (de Microsoft):
+   * Te permitirá ejecutar el script de publicación directamente en la terminal integrada de VS Code con un solo clic.
 
-### CSS: Transition duplicado en navbar (linea ~109)
-```css
-/* ERROR - esta duplicado */
-transition: background-color 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;ion: background-color 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;
+---
 
-/* CORREGIR A: */
-transition: background-color 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;
-```
+## 🐍 Script de Publicación en Python (`publish.py`)
 
-### HTML: Tag </header> sobrante (linea ~258)
-```html
-</nav>
-</header>  <!-- ESTA ETIQUETA SOBRA - ELIMINAR -->
+En lugar de Visual Basic, utilizaremos un script en **Python** para automatizar la corrección del HTML (reparar etiquetas de imágenes rotas) y empaquetar todo en una carpeta de distribución lista para subir a producción.
 
-<!-- SIGUIENTE LINEA: -->
-<section class="hero" id="inicio">
-```
+### Código del Script (`publish.py`):
 
-### HTML: Divs duplicados en recursos
-El codigo tiene `<div class="resource-card reveal">` vacios despues de cada `<a>`. Eliminar los divs vacios.
+Crea un archivo llamado `publish.py` en la raíz de tu proyecto en VS Code y pega el siguiente código:
 
-## Publicar en GitHub Pages
+```python
+import os
+import shutil
 
-### Paso 1: Crear repositorio
-1. Ir a https://github.com/new
-2. Nombre: `equi-bienestar` (o similar)
-3. Crear repositorio
+def publicar_sitio():
+    # Definir rutas relativas basadas en el directorio actual
+    ruta_proyecto = os.getcwd()
+    ruta_origen_html = os.path.join(ruta_proyecto, 'index.html')
+    ruta_origen_imagenes = os.path.join(ruta_proyecto, 'images')
+    
+    # Carpeta 'dist' donde se guardará la web lista para subir
+    ruta_destino_web = os.path.join(ruta_proyecto, 'dist')
+    ruta_destino_html = os.path.join(ruta_destino_web, 'index.html')
+    ruta_destino_imagenes = os.path.join(ruta_destino_web, 'images')
 
-### Paso 2: Subir archivos
-```powershell
-# Desde la carpeta del proyecto
-cd "C:\Users\Arturo N\OneDrive\Escritorio\project"
+    try:
+        print("=== Iniciando publicación en Python con VS Code ===")
 
-git init
-git add .
-git commit -m "Primera version de Equi"
-git remote add origin https://github.com/TU-USUARIO/equi-bienestar.git
-git push -u origin main
-```
+        # 1. Crear el directorio de destino 'dist' si no existe
+        if not os.path.exists(ruta_destino_web):
+            os.makedirs(ruta_destino_web)
+            print("Carpeta 'dist/' creada.")
 
-### Paso 3: Activar GitHub Pages
-1. Ir a **Settings** del repositorio
-2. Seleccionar **Pages** en el menu izquierdo
-3. En **Source**, seleccionar: `Deploy from a branch`
-4. Seleccionar rama: `main` / `master`
-5. Carpeta: `/ (root)`
-6. Guardar
+        # 2. Leer y corregir el HTML original
+        if not os.path.exists(ruta_origen_html):
+            print("Error: No se encontró el archivo 'index.html' en la raíz.")
+            return
+        
+        with open(ruta_origen_html, 'r', encoding='utf-8') as f:
+            contenido_html = f.read()
+        
+        print("Reparando etiquetas HTML de imágenes...")
+        
+        # Corrección de la etiqueta rota del logo en el Hero (<img src=... sin cerrar antes de </div>)
+        html_corregido = contenido_html.replace(
+            '<img src="images/logo-equi.png" alt="Logo Equi"',
+            '<img src="images/logo-equi.png" alt="Logo Equi">'
+        )
 
-### Paso 4: Verificar imagen
-Despues de publicar, verificar que la imagen aparezca en:
-- `https://TU-USUARIO.github.io/equi-bienestar/`
-- La ruta correcta es: `images/logo-equi.png`
+        # Escribir el HTML reparado en la carpeta de distribución
+        with open(ruta_destino_html, 'w', encoding='utf-8') as f:
+            f.write(html_corregido)
+        print("HTML corregido copiado a 'dist/index.html'.")
 
-> **Si la imagen NO aparece:** Verificar que el commit incluyo la carpeta `images/` con `logo-equi.png` dentro.
+        # 3. Copiar la carpeta de imágenes
+        if os.path.exists(ruta_origen_imagenes):
+            if os.path.exists(ruta_destino_imagenes):
+                shutil.rmtree(ruta_destino_imagenes) # Limpiar versión anterior
+            
+            shutil.copytree(ruta_origen_imagenes, ruta_destino_imagenes)
+            print("Imágenes copiadas con éxito a 'dist/images/'.")
+        else:
+            print("Advertencia: No se encontró la carpeta de origen 'images/'.")
 
-## Exportar a Descargas (ZIP)
+        print("\n¡Publicación generada con éxito! Sube el contenido de la carpeta '/dist' a tu servidor.")
 
-### Comando PowerShell
-```powershell
-Compress-Archive -Path "C:\Users\Arturo N\OneDrive\Escritorio\project\*" -DestinationPath "C:\Users\Arturo N\Downloads\Equi-Bienestar.zip" -Force
-```
+    except Exception as e:
+        print(f"Ocurrió un error durante el proceso: {e}")
 
-### Sin archivos de respaldo (#*.html)
-```powershell
-$source = "C:\Users\Arturo N\OneDrive\Escritorio\project"
-$files = Get-ChildItem -Path $source -File | Where-Object { $_.Name -notmatch '^#' }
-$folders = Get-ChildItem -Path $source -Directory
-
-TempPath = "$env:TEMP\Equi-Bienestar"
-if (Test-Path $TempPath) { Remove-Item $TempPath -Recurse -Force }
-New-Item -ItemType Directory -Path $TempPath | Out-Null
-
-$files | Copy-Item -Destination $TempPath
-$folders | Copy-Item -Destination $TempPath -Recurse
-
-Compress-Archive -Path "$TempPath\*" -DestinationPath "C:\Users\Arturo N\Downloads\Equi-Bienestar.zip" -Force
-Remove-Item $TempPath -Recurse -Force
+if __name__ == '__main__':
+    publicar_sitio()
 ```
 
-## Solucion de Problemas
+### Pasos para ejecutar en la terminal de VS Code:
 
-| Problema | Solucion |
-|----------|----------|
-| Logo no carga | Verificar que `images/logo-equi.png` exista y la ruta sea `images/logo-equi.png` |
-| CSS no aplica | Verificar que no haya errores de sintaxis (ver seccion Errores Conocidos) |
-| JS no funciona | Verificar que `script.js` este en la misma carpeta que `index.html` |
-| Paginas no abren | Los archivos `.html` deben estar en la misma carpeta que `index.html` |
-| GitHub Pages no muestra imagen | Verificar que el commit incluyo la carpeta `images/` |
-
-## Tecnologias
-
-- HTML5
-- CSS3 (dentro de `<style>`)
-- JavaScript vanilla
-- Sin dependencias externas
+1. Abre la terminal integrada (`Ctrl + \`` o `Cmd + \``).
+2. Ejecuta el script ejecutando:
+   ```bash
+   python publish.py
+   ```
+3. Esto creará una carpeta llamada `/dist` con tu `index.html` perfectamente reparado y tus imágenes organizadas. Solo tendrás que subir el contenido de esta carpeta a tu hosting web (GitHub Pages, Netlify, Vercel, etc.).
