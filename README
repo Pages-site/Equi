@@ -1,6 +1,6 @@
 # Equi — Bienestar Emocional
 
-Proyecto universitorio de una pagina web para promover la salud emocional entre estudiantes.
+Pagina web para promover la salud emocional entre estudiantes universitarios.
 
 ## Estructura del Proyecto
 
@@ -14,81 +14,130 @@ project/
   planificador.html     ← Planificador inteligente
   pausas.html           ← Pausas activas
   comunidad.html        ← Comunidad virtual
-  script.js             ← JavaScript (menu, scroll, form)
+  script.js             ← JavaScript (menu hamburguesa, scroll, formulario)
   images/
-    logo-equi.png       ← Logo usado en 2 partes de la pagina
+    logo-equi.png       ← Logo utilizado en 2 partes de la pagina
+  #*.html               ← Archivos de respaldo (no incluir en publicacion)
 ```
 
-## Imagen del Logo (`images/logo-equi.png`)
+## Ubicacion del Logo (`images/logo-equi.png`)
 
-El logo `logo-equi.png` se usa en **2 lugares** dentro de `index.html`:
+El logo se carga desde **2 ubicaciones** en `index.html`:
 
-1. **Barra de navegacion** (linea ~185):
-   ```html
-   <a href="#inicio" class="nav-logo">
-       <img src="images/logo-equi.png" alt="Logo Equi">
-   </a>
-   ```
+### 1. Barra de navegacion (navbar)
+```html
+<a href="#inicio" class="nav-logo">
+    <img src="images/logo-equi.png" alt="Logo Equi" class="logo">
+</a>
+```
+- Clase CSS: `.nav-logo img`
+- Ancho fijo: `width: 120px`, Alto: `height: 50px`
 
-2. **Seccion Hero** (linea ~200):
-   ```html
-   <div class="hero-logo">
-       <img src="images/logo-equi.png" alt="Logo Equi">
-   </div>
-   ```
+### 2. Seccion Hero (principal)
+```html
+<div class="hero-logo">
+    <img src="images/logo-equi.png" alt="Logo Equi" class="logo">
+</div>
+```
+- Clase CSS: `.hero-logo img`
+- Ancho fijo: `width: 200px`, Alto: automatico
 
-> **IMPORTANTE:** La carpeta `images/` debe estar en la **misma carpeta** que `index.html`. Si la imagen no aparece, verifica que la ruta sea correcta.
+> **REGLA CLAVE:** La ruta siempre es `images/logo-equi.png` (relativa a index.html). La carpeta `images/` debe estar en la misma nivel que `index.html`.
 
-## Como Publicar (GitHub Pages)
+## Errores Conocidos en el Codigo
 
-1. Crear un repositorio en GitHub
-2. Subir todos los archivos del proyecto (incluyendo la carpeta `images/`)
-3. Ir a **Settings > Pages**
-4. En **Source**, seleccionar la rama `main` o `master`
-5. Guardar — el sitio estara disponible en `https://tu-usuario.github.io/nombre-repo/`
+### CSS: Transition duplicado en navbar (linea ~109)
+```css
+/* ERROR - esta duplicado */
+transition: background-color 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;ion: background-color 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;
 
-## Como Publicar (Netlify)
+/* CORREGIR A: */
+transition: background-color 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;
+```
 
-1. Crear cuenta en [netlify.com](https://netlify.com)
-2. Arrastrar la carpeta completa del proyecto al area de deploy
-3. Netlify asignara una URL automaticamente
+### HTML: Tag </header> sobrante (linea ~258)
+```html
+</nav>
+</header>  <!-- ESTA ETIQUETA SOBRA - ELIMINAR -->
 
-## Como Exportar a Descargas (ZIP)
+<!-- SIGUIENTE LINEA: -->
+<section class="hero" id="inicio">
+```
 
-### Opcion 1: Desde la terminal
+### HTML: Divs duplicados en recursos
+El codigo tiene `<div class="resource-card reveal">` vacios despues de cada `<a>`. Eliminar los divs vacios.
+
+## Publicar en GitHub Pages
+
+### Paso 1: Crear repositorio
+1. Ir a https://github.com/new
+2. Nombre: `equi-bienestar` (o similar)
+3. Crear repositorio
+
+### Paso 2: Subir archivos
 ```powershell
 # Desde la carpeta del proyecto
-Compress-Archive -Path .\* -DestinationPath ..\Equi-Bienestar.zip
+cd "C:\Users\Arturo N\OneDrive\Escritorio\project"
+
+git init
+git add .
+git commit -m "Primera version de Equi"
+git remote add origin https://github.com/TU-USUARIO/equi-bienestar.git
+git push -u origin main
 ```
 
-### Opcion 2: Manual
-1. Abrir la carpeta del proyecto en el explorador
-2. Seleccionar todos los archivos (Ctrl+A)
-3. Clic derecho > **Enviar a > Carpeta comprimida (zip)**
+### Paso 3: Activar GitHub Pages
+1. Ir a **Settings** del repositorio
+2. Seleccionar **Pages** en el menu izquierdo
+3. En **Source**, seleccionar: `Deploy from a branch`
+4. Seleccionar rama: `main` / `master`
+5. Carpeta: `/ (root)`
+6. Guardar
 
-### Opcion 3: PowerShell (ruta especifica)
+### Paso 4: Verificar imagen
+Despues de publicar, verificar que la imagen aparezca en:
+- `https://TU-USUARIO.github.io/equi-bienestar/`
+- La ruta correcta es: `images/logo-equi.png`
+
+> **Si la imagen NO aparece:** Verificar que el commit incluyo la carpeta `images/` con `logo-equi.png` dentro.
+
+## Exportar a Descargas (ZIP)
+
+### Comando PowerShell
+```powershell
+Compress-Archive -Path "C:\Users\Arturo N\OneDrive\Escritorio\project\*" -DestinationPath "C:\Users\Arturo N\Downloads\Equi-Bienestar.zip" -Force
+```
+
+### Sin archivos de respaldo (#*.html)
 ```powershell
 $source = "C:\Users\Arturo N\OneDrive\Escritorio\project"
-$dest = "C:\Users\Arturo N\Downloads\Equi-Bienestar.zip"
-Compress-Archive -Path "$source\*" -DestinationPath $dest -Force
+$files = Get-ChildItem -Path $source -File | Where-Object { $_.Name -notmatch '^#' }
+$folders = Get-ChildItem -Path $source -Directory
+
+TempPath = "$env:TEMP\Equi-Bienestar"
+if (Test-Path $TempPath) { Remove-Item $TempPath -Recurse -Force }
+New-Item -ItemType Directory -Path $TempPath | Out-Null
+
+$files | Copy-Item -Destination $TempPath
+$folders | Copy-Item -Destination $TempPath -Recurse
+
+Compress-Archive -Path "$TempPath\*" -DestinationPath "C:\Users\Arturo N\Downloads\Equi-Bienestar.zip" -Force
+Remove-Item $TempPath -Recurse -Force
 ```
 
 ## Solucion de Problemas
 
 | Problema | Solucion |
 |----------|----------|
-| Logo no aparece | Verificar que `images/logo-equi.png` exista y la ruta en HTML sea `images/logo-equi.png` |
-| Estilos no cargan | Asegurarse de que el CSS este dentro del `<style>` o en un archivo `.css` referenciado |
-| JavaScript no funciona | Verificar que `script.js` este en la misma carpeta que `index.html` |
-| Paginas internas no abren | Los archivos `.html` deben estar en la misma carpeta que `index.html` |
+| Logo no carga | Verificar que `images/logo-equi.png` exista y la ruta sea `images/logo-equi.png` |
+| CSS no aplica | Verificar que no haya errores de sintaxis (ver seccion Errores Conocidos) |
+| JS no funciona | Verificar que `script.js` este en la misma carpeta que `index.html` |
+| Paginas no abren | Los archivos `.html` deben estar en la misma carpeta que `index.html` |
+| GitHub Pages no muestra imagen | Verificar que el commit incluyo la carpeta `images/` |
 
 ## Tecnologias
 
 - HTML5
-- CSS3 (dentro del `<style>`)
+- CSS3 (dentro de `<style>`)
 - JavaScript vanilla
 - Sin dependencias externas
-
-## Licencia
-
-Proyecto universitario — todos los derechos reservados.
