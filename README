@@ -1,0 +1,94 @@
+# Equi — Bienestar Emocional
+
+Proyecto universitorio de una pagina web para promover la salud emocional entre estudiantes.
+
+## Estructura del Proyecto
+
+```
+project/
+  index.html            ← Pagina principal
+  meditacion.html       ← Meditacion guiada
+  diario.html           ← Diario emocional
+  respiracion.html      ← Ejercicios de respiracion
+  bienestar.html        ← Bienestar integral
+  planificador.html     ← Planificador inteligente
+  pausas.html           ← Pausas activas
+  comunidad.html        ← Comunidad virtual
+  script.js             ← JavaScript (menu, scroll, form)
+  images/
+    logo-equi.png       ← Logo usado en 2 partes de la pagina
+```
+
+## Imagen del Logo (`images/logo-equi.png`)
+
+El logo `logo-equi.png` se usa en **2 lugares** dentro de `index.html`:
+
+1. **Barra de navegacion** (linea ~185):
+   ```html
+   <a href="#inicio" class="nav-logo">
+       <img src="images/logo-equi.png" alt="Logo Equi">
+   </a>
+   ```
+
+2. **Seccion Hero** (linea ~200):
+   ```html
+   <div class="hero-logo">
+       <img src="images/logo-equi.png" alt="Logo Equi">
+   </div>
+   ```
+
+> **IMPORTANTE:** La carpeta `images/` debe estar en la **misma carpeta** que `index.html`. Si la imagen no aparece, verifica que la ruta sea correcta.
+
+## Como Publicar (GitHub Pages)
+
+1. Crear un repositorio en GitHub
+2. Subir todos los archivos del proyecto (incluyendo la carpeta `images/`)
+3. Ir a **Settings > Pages**
+4. En **Source**, seleccionar la rama `main` o `master`
+5. Guardar — el sitio estara disponible en `https://tu-usuario.github.io/nombre-repo/`
+
+## Como Publicar (Netlify)
+
+1. Crear cuenta en [netlify.com](https://netlify.com)
+2. Arrastrar la carpeta completa del proyecto al area de deploy
+3. Netlify asignara una URL automaticamente
+
+## Como Exportar a Descargas (ZIP)
+
+### Opcion 1: Desde la terminal
+```powershell
+# Desde la carpeta del proyecto
+Compress-Archive -Path .\* -DestinationPath ..\Equi-Bienestar.zip
+```
+
+### Opcion 2: Manual
+1. Abrir la carpeta del proyecto en el explorador
+2. Seleccionar todos los archivos (Ctrl+A)
+3. Clic derecho > **Enviar a > Carpeta comprimida (zip)**
+
+### Opcion 3: PowerShell (ruta especifica)
+```powershell
+$source = "C:\Users\Arturo N\OneDrive\Escritorio\project"
+$dest = "C:\Users\Arturo N\Downloads\Equi-Bienestar.zip"
+Compress-Archive -Path "$source\*" -DestinationPath $dest -Force
+```
+
+## Solucion de Problemas
+
+| Problema | Solucion |
+|----------|----------|
+| Logo no aparece | Verificar que `images/logo-equi.png` exista y la ruta en HTML sea `images/logo-equi.png` |
+| Estilos no cargan | Asegurarse de que el CSS este dentro del `<style>` o en un archivo `.css` referenciado |
+| JavaScript no funciona | Verificar que `script.js` este en la misma carpeta que `index.html` |
+| Paginas internas no abren | Los archivos `.html` deben estar en la misma carpeta que `index.html` |
+
+## Tecnologias
+
+- HTML5
+- CSS3 (dentro del `<style>`)
+- JavaScript vanilla
+- Sin dependencias externas
+
+## Licencia
+
+Proyecto universitario — todos los derechos reservados.
