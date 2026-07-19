@@ -1,7 +1,4 @@
 
-![image alt] (https://github.com/Pages-site/Equi/blob/c1737df9d08ae40cc3b65de1780802cd07bfe7de/logo-equi.png)
-
-
 # Equi — Bienestar Emocional
 
 <p align="center">
